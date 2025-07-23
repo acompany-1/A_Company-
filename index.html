@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:">
+    <title>Company - پلتفرم مدیریت عناصر</title>
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="styles.css" as="style">
+    <link rel="preload" href="script.js" as="script">
+    
+    <!-- Progressive Web App -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#8b5cf6">
+    
+    <!-- SEO and Social -->
+    <meta name="description" content="پلتفرم مدیریت عناصر Company - مدیریت حرفه‌ای عناصر طبیعی">
+    <meta name="keywords" content="آب، آتش، باد، خاک، عناصر، مدیریت">
+    
+    <!-- Fonts with display swap for better performance -->
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Critical CSS inlined for better performance -->
+    <style>
+        /* Critical above-the-fold styles */
+        body { 
+            font-family: 'Vazirmatn', sans-serif; 
+            margin: 0; 
+            overflow-x: hidden;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <h2>در حال بارگذاری...</h2>
+            <div class="loading-progress">
+                <div class="loading-bar" id="loadingBar"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CSRF Token (Hidden) -->
+    <input type="hidden" id="csrfToken" value="">
+
+    <!-- Settings Panel -->
+    <div class="settings-panel" id="settingsPanel">
+        <div class="settings-header">
+            <h3><i class="fas fa-cog"></i> تنظیمات</h3>
+            <button class="close-settings" onclick="closeSettings()">×</button>
+        </div>
+        <div class="settings-content">
+            <div class="setting-group">
+                <label>تم رنگی:</label>
+                <div class="theme-options">
+                    <button class="theme-btn active" data-theme="purple" style="background: #8b5cf6;"></button>
+                    <button class="theme-btn" data-theme="blue" style="background: #3b82f6;"></button>
+                    <button class="theme-btn" data-theme="green" style="background: #10b981;"></button>
+                    <button class="theme-btn" data-theme="red" style="background: #ef4444;"></button>
+                </div>
+            </div>
+            <div class="setting-group">
+                <label>
+                    <input type="checkbox" id="animationsToggle" checked>
+                    فعال‌سازی انیمیشن‌ها
+                </label>
+            </div>
+            <div class="setting-group">
+                <label>
+                    <input type="checkbox" id="soundToggle" checked>
+                    صداهای سیستم
+                </label>
+            </div>
+            <div class="setting-group">
+                <label>
+                    <input type="checkbox" id="notificationsToggle" checked>
+                    اعلان‌های فوری
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Authentication Container -->
+    <div class="container" id="authContainer">
+        <!-- Particle Background -->
+        <div class="particles" id="particles"></div>
+        
+        <!-- Enhanced Header -->
+        <header class="auth-header">
+            <div class="logo-container">
+                <div class="logo-icon">
+                    <i class="fas fa-fire"></i>
+                </div>
+                <h1>Company</h1>
+                <p>پلتفرم مدیریت عناصر</p>
+            </div>
+            <div class="security-badges">
+                <span class="security-badge">
+                    <i class="fas fa-shield-alt"></i>
+                    امن
+                </span>
+                <span class="security-badge">
+                    <i class="fas fa-lock"></i>
+                    رمزگذاری شده
+                </span>
+            </div>
+        </header>
+
+        <!-- Enhanced Auth Card -->
+        <div class="auth-card">
+            <!-- Tab Navigation -->
+            <div class="tab-nav">
+                <button class="tab-btn active" onclick="showLogin()">
+                    <i class="fas fa-sign-in-alt"></i>
+                    ورود
+                </button>
+                <button class="tab-btn" onclick="showRegister()">
+                    <i class="fas fa-user-plus"></i>
+                    ثبت نام
+                </button>
+            </div>
+
+            <!-- Login Form -->
+            <form class="auth-form active" id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">
+                        <i class="fas fa-envelope"></i>
+                        ایمیل
+                    </label>
+                    <input type="email" id="loginEmail" required autocomplete="email">
+                    <div class="input-validation"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="loginPassword">
+                        <i class="fas fa-lock"></i>
+                        رمز عبور
+                    </label>
+                    <div class="password-container">
+                        <input type="password" id="loginPassword" required autocomplete="current-password">
+                        <button type="button" class="password-toggle" onclick="togglePassword('loginPassword')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="input-validation"></div>
+                </div>
+
+                <!-- Enhanced Captcha -->
+                <div class="form-group captcha-group">
+                    <label>کد امنیتی:</label>
+                    <div class="captcha-container">
+                        <canvas id="captchaCanvas" width="120" height="40"></canvas>
+                        <button type="button" onclick="generateCaptcha()" class="captcha-refresh">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    <input type="text" id="captchaInput" placeholder="کد امنیتی را وارد کنید" required maxlength="6">
+                    <div class="input-validation"></div>
+                </div>
+
+                <!-- Remember Me & Forgot Password -->
+                <div class="form-options">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="rememberMe">
+                        <span class="checkmark"></span>
+                        مرا به خاطر بسپار
+                    </label>
+                    <a href="#" class="forgot-password">فراموشی رمز عبور؟</a>
+                </div>
+
+                <!-- 2FA Toggle -->
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="enable2FA">
+                        <span class="checkmark"></span>
+                        فعال‌سازی احراز هویت دو مرحله‌ای
+                    </label>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    <span class="btn-text">ورود</span>
+                    <div class="btn-loader"></div>
+                </button>
+
+                <!-- Social Login -->
+                <div class="social-login">
+                    <p>یا ورود با:</p>
+                    <div class="social-buttons">
+                        <button type="button" class="social-btn google">
+                            <i class="fab fa-google"></i>
+                        </button>
+                        <button type="button" class="social-btn github">
+                            <i class="fab fa-github"></i>
+                        </button>
+                        <button type="button" class="social-btn linkedin">
+                            <i class="fab fa-linkedin"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Register Form -->
+            <form class="auth-form" id="registerForm">
+                <div class="form-group">
+                    <label for="registerName">
+                        <i class="fas fa-user"></i>
+                        نام کامل
+                    </label>
+                    <input type="text" id="registerName" required autocomplete="name">
+                    <div class="input-validation"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="registerEmail">
+                        <i class="fas fa-envelope"></i>
+                        ایمیل
+                    </label>
+                    <input type="email" id="registerEmail" required autocomplete="email">
+                    <div class="input-validation"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="registerPassword">
+                        <i class="fas fa-lock"></i>
+                        رمز عبور
+                    </label>
+                    <div class="password-container">
+                        <input type="password" id="registerPassword" required autocomplete="new-password">
+                        <button type="button" class="password-toggle" onclick="togglePassword('registerPassword')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="password-strength">
+                        <div class="strength-bar">
+                            <div class="strength-fill"></div>
+                        </div>
+                        <span class="strength-text">قدرت رمز عبور</span>
+                    </div>
+                    <div class="input-validation"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">
+                        <i class="fas fa-lock"></i>
+                        تکرار رمز عبور
+                    </label>
+                    <div class="password-container">
+                        <input type="password" id="confirmPassword" required autocomplete="new-password">
+                        <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="input-validation"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="agreeTerms" required>
+                        <span class="checkmark"></span>
+                        با <a href="#" class="terms-link">قوانین و مقررات</a> موافقم
+                    </label>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    <span class="btn-text">ثبت نام</span>
+                    <div class="btn-loader"></div>
+                </button>
+            </form>
+        </div>
+
+        <!-- Security Footer -->
+        <footer class="security-footer">
+            <p>
+                <i class="fas fa-shield-alt"></i>
+                اتصال شما با رمزگذاری SSL محافظت می‌شود
+            </p>
+        </footer>
+    </div>
+
+    <!-- Enhanced Dashboard -->
+    <div class="dashboard hidden" id="dashboard">
+        <!-- Dashboard Header -->
+        <header class="dashboard-header">
+            <div class="header-left">
+                <div class="logo">
+                    <i class="fas fa-fire"></i>
+                    <span>Company</span>
+                </div>
+                <div class="breadcrumb">
+                    <span>داشبورد</span>
+                    <i class="fas fa-chevron-left"></i>
+                    <span>عناصر</span>
+                </div>
+            </div>
+            
+            <!-- Enhanced Search -->
+            <div class="search-container">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="جستجو در عناصر...">
+                    <div class="search-filters">
+                        <button class="filter-btn" onclick="toggleFilters()">
+                            <i class="fas fa-filter"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="filter-panel" id="filterPanel">
+                    <div class="filter-group">
+                        <label>نوع عنصر:</label>
+                        <select id="elementTypeFilter">
+                            <option value="">همه</option>
+                            <option value="water">آب</option>
+                            <option value="fire">آتش</option>
+                            <option value="wind">باد</option>
+                            <option value="earth">خاک</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>قدرت:</label>
+                        <div class="range-slider">
+                            <input type="range" id="powerFilter" min="0" max="100" value="0">
+                            <span id="powerValue">0</span>%
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="header-right">
+                <button class="header-btn notification-btn" onclick="showNotifications()">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </button>
+                <button class="header-btn settings-btn" onclick="openSettings()">
+                    <i class="fas fa-cog"></i>
+                </button>
+                <div class="user-menu">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-info">
+                        <span class="user-name" id="userName">کاربر</span>
+                        <span class="user-role">مدیر</span>
+                    </div>
+                    <div class="user-dropdown">
+                        <button onclick="showProfile()">
+                            <i class="fas fa-user-circle"></i>
+                            پروفایل
+                        </button>
+                        <button onclick="showHelp()">
+                            <i class="fas fa-question-circle"></i>
+                            راهنما
+                        </button>
+                        <button onclick="logout()">
+                            <i class="fas fa-sign-out-alt"></i>
+                            خروج
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard Content -->
+        <main class="dashboard-content">
+            <!-- Stats Overview -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>1,234</h3>
+                        <p>کاربران فعال</p>
+                        <span class="stat-change positive">+12%</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>456</h3>
+                        <p>عناصر فعال</p>
+                        <span class="stat-change positive">+8%</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>98.5%</h3>
+                        <p>عملکرد سیستم</p>
+                        <span class="stat-change positive">+2%</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>100%</h3>
+                        <p>امنیت</p>
+                        <span class="stat-change neutral">0%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Elements Grid -->
+            <div class="elements-section">
+                <div class="section-header">
+                    <h2>عناصر طبیعی</h2>
+                    <div class="view-toggle">
+                        <button class="view-btn active" data-view="grid">
+                            <i class="fas fa-th"></i>
+                        </button>
+                        <button class="view-btn" data-view="list">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="elements-grid" id="elementsGrid">
+                    <!-- Water Element -->
+                    <div class="element-card" data-element="water" data-power="85">
+                        <div class="element-header">
+                            <div class="element-icon">
+                                <img src="/placeholder.svg?height=60&width=60&text=💧" alt="آب" class="lazy-image" loading="lazy">
+                            </div>
+                            <div class="element-actions">
+                                <button class="action-btn favorite" title="افزودن به علاقه‌مندی‌ها">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                                <button class="action-btn share" title="اشتراک‌گذاری">
+                                    <i class="fas fa-share"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="element-content">
+                            <h3>آب</h3>
+                            <p>عنصر حیات و طراوت</p>
+                            <div class="element-stats">
+                                <div class="stat">
+                                    <span class="stat-label">قدرت:</span>
+                                    <div class="stat-bar">
+                                        <div class="stat-fill" style="width: 85%;"></div>
+                                    </div>
+                                    <span class="stat-value">85%</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-label">انرژی:</span>
+                                    <div class="stat-bar">
+                                        <div class="stat-fill" style="width: 70%;"></div>
+                                    </div>
+                                    <span class="stat-value">70%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="element-btn">
+                            <span>انتخاب عنصر</span>
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                    </div>
+
+                    <!-- Fire Element -->
+                    <div class="element-card" data-element="fire" data-power="95">
+                        <div class="element-header">
+                            <div class="element-icon">
+                                <img src="/placeholder.svg?height=60&width=60&text=🔥" alt="آتش" class="lazy-image" loading="lazy">
+                            </div>
+                            <div class="element-actions">
+                                <button class="action-btn favorite" title="افزودن به علاقه‌مندی‌ها">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                                <button class="action-btn share" title="اشتراک‌گذاری">
+                                    <i class="fas fa-share"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="element-content">
+                            <h3>آتش</h3>
+                            <p>عنصر انرژی و قدرت</p>
+                            <div class="element-stats">
+                                <div class="stat">
+                                    <span class="stat-label">قدرت:</span>
+                                    <div class="stat-bar">
+                                        <div class="stat-fill" style="width: 95%;"></div>
+                                    </div>
+                                    <span class="stat-value">95%</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-label">انرژی:</span>
+                                    <div class="stat-bar">
+                                        <div class="stat-fill" style="width: 90%;"></div>
+                                    </div>
+                                    <span class="stat-value">90%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="element-btn">
+                            <span>انتخاب عنصر</span>
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                    </div>
+
+                    <!-- Wind Element -->
+                    <div class="element-card" data-element="wind" data-power="75">
+                        <div class="element-header">
+                            <div class="element-icon">
+                                <img src="/placeholder.svg?height=60&width=60&text=💨" alt="باد" class="lazy-image" loading="lazy">
+                            </div>
+                            <div class="element-actions">
+                                <button class="action-btn favorite" title="افزودن به علاقه‌مندی‌ها">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                                <button class="action-btn share" title="اشتراک‌گذاری">
+                                    <i class="fas fa-share"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="element-content">
+                            <h3>باد</h3>
+                            <p>عنصر آزادی و حرکت</p>
+                            <div class="element-stats">
+                                <div class="stat">
+                                    <span class="stat-label">قدرت:</span>
+                                    <div class="stat-bar">
+                                        <div class="stat-fill" style="width: 75%;"></div>
+                                    </div>
+                                    <span class="stat-value">75%</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-label">انرژی:</span>
+                                    <div class="stat-bar">
+                                        <div class="stat-fill" style="width: 80%;"></div>
+                                    </div>
+                                    <span class="stat-value">80%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="element-btn">
+                            <span>انتخاب عنصر</span>
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                    </div>
+
+                    <!-- Earth Element -->
+                    <div class="element-card" data-element="earth" data-power="90">
+                        <div class="element-header">
+                            <div class="element-icon">
+                                <img src="/placeholder.svg?height=60&width=60&text=🌍" alt="خاک" class="lazy-image" loading="lazy">
+                            </div>
+                            <div class="element-actions">
+                                <button class="action-btn favorite" title="افزودن به علاقه‌مندی‌ها">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                                <button class="action-btn share" title="اشتراک‌گذاری">
+                                    <i class="fas fa-share"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="element-content">
+                            <h3>خاک</h3>
+                            <p>عنصر ثبات و استحکام</p>
+                            <div class="element-stats">
+                                <div class="stat">
+                                    <span class="stat-label">قدرت:</span>
+                                    <div class="stat-bar">
+                                        <div class="stat-fill" style="width: 90%;"></div>
+                                    </div>
+                                    <span class="stat-value">90%</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-label">انرژی:</span>
+                                    <div class="stat-bar">
+                                        <div class="stat-fill" style="width: 65%;"></div>
+                                    </div>
+                                    <span class="stat-value">65%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="element-btn">
+                            <span>انتخاب عنصر</span>
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Help Documentation -->
+            <div class="help-section" id="helpSection" style="display: none;">
+                <div class="help-header">
+                    <h2>راهنمای استفاده</h2>
+                    <button class="close-help" onclick="closeHelp()">×</button>
+                </div>
+                <div class="help-content">
+                    <div class="help-nav">
+                        <ul>
+                            <li><a href="#getting-started" class="active">شروع به کار</a></li>
+                            <li><a href="#elements-guide">راهنمای عناصر</a></li>
+                            <li><a href="#security">امنیت</a></li>
+                            <li><a href="#shortcuts">میانبرهای کیبورد</a></li>
+                        </ul>
+                    </div>
+                    <div class="help-articles">
+                        <article id="getting-started" class="help-article active">
+                            <h3>شروع به کار</h3>
+                            <p>به پلتفرم Company خوش آمدید. این راهنما شما را در استفاده از امکانات سیستم یاری می‌کند.</p>
+                            <h4>مراحل اولیه:</h4>
+                            <ol>
+                                <li>ابتدا پروفایل خود را تکمیل کنید</li>
+                                <li>عناصر مورد نظر خود را انتخاب کنید</li>
+                                <li>از امکانات شخصی‌سازی استفاده کنید</li>
+                            </ol>
+                        </article>
+                        <article id="elements-guide" class="help-article">
+                            <h3>راهنمای عناصر</h3>
+                            <p>هر عنصر دارای ویژگی‌ها و قابلیت‌های منحصر به فردی است:</p>
+                            <ul>
+                                <li><strong>آب:</strong> عنصر انعطاف‌پذیری و شفابخشی</li>
+                                <li><strong>آتش:</strong> عنصر انرژی و تحول</li>
+                                <li><strong>باد:</strong> عنصر آزادی و تغییر</li>
+                                <li><strong>خاک:</strong> عنصر ثبات و محافظت</li>
+                            </ul>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 2FA Modal -->
+    <div class="modal" id="twoFAModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>احراز هویت دو مرحله‌ای</h3>
+                <button class="modal-close" onclick="closeTwoFAModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <p>کد 6 رقمی ارسال شده به شماره موبایل شما را وارد کنید:</p>
+                <div class="verification-inputs">
+                    <input type="text" maxlength="1" class="verification-input">
+                    <input type="text" maxlength="1" class="verification-input">
+                    <input type="text" maxlength="1" class="verification-input">
+                    <input type="text" maxlength="1" class="verification-input">
+                    <input type="text" maxlength="1" class="verification-input">
+                    <input type="text" maxlength="1" class="verification-input">
+                </div>
+                <div class="verification-timer">
+                    ارسال مجدد کد در <span id="resendTimer">60</span> ثانیه
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeTwoFAModal()">انصراف</button>
+                <button class="btn-primary" onclick="verifyTwoFA()">تأیید</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PWA Install Prompt -->
+    <div class="pwa-prompt" id="pwaPrompt" style="display: none;">
+        <div class="pwa-content">
+            <i class="fas fa-mobile-alt"></i>
+            <div>
+                <h4>نصب اپلیکیشن</h4>
+                <p>Company را روی دستگاه خود نصب کنید</p>
+            </div>
+            <button onclick="installPWA()">نصب</button>
+            <button onclick="dismissPWA()">×</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="security.js" defer></script>
+    <script src="animations.js" defer></script>
+    <script src="script.js" defer></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch(registrationError => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
